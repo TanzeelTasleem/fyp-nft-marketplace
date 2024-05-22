@@ -1,0 +1,93 @@
+{
+  "HOME": {
+    "title": "Home",
+    "path": "/"
+  },
+  "PROFILE": {
+    "title": "My Profile",
+    "path": "/profile",
+    "routes": {
+      "USER_DETAIL": {
+        "path": "/:username"
+      },
+      "EDIT_PROFILE": {
+        "title": "Edit Profile",
+        "path": "/edit-profile",
+        "fullpath": "/profile/collections/create"
+      }
+    }
+  },
+  "COLLECTIONS": {
+    "title": "Collections",
+    "path": "/collections",
+    "routes": {
+      "CREATE": {
+        "title": "Create Collection",
+        "path": "/create",
+        "fullpath": "/collections/create"
+      },
+      "COLLECTION_DETAIL": {
+        "path": "/:CollectionId",
+        "routes": {
+          "EDIT": {
+            "title": "Update Collection",
+            "path": "/edit",
+            "fullpath": "/:CollectionId/edit"
+          }
+        }
+      }
+    }
+  },
+  "ASSETS": {
+    "title": "NFTs",
+    "path": "/assets",
+    "routes": {
+      "CREATE": {
+        "title": "Create NFT",
+        "path": "/create",
+        "fullpath": "/assets/create"
+      },
+      "ITEM_DETAIL": {
+        "path": "/:assetId",
+        "routes": {
+          "EDIT": {
+            "title": "Edit Asset",
+            "path": "/edit",
+            "fullpath": "/:assetId/edit"
+          },
+          "LIST_NFT": {
+            "title": "List Asset",
+            "path": "/list",
+            "fullpath": "/:assetId/list"
+          }
+        }
+      }
+    }
+  },
+  "HELP_CENTER": {
+    "title": "Help Center",
+    "path": "/help-center"
+  },
+  "RANKING": {
+    "title": "Ranking",
+    "path": "/ranking"
+  },
+  "ACTIVITY": {
+    "title": "Activity",
+    "path": "/activity"
+  },
+  "ADMIN": {
+    "title": "Admin",
+    "path": "/admin",
+    "routes": {
+      "LOGIN": {
+        "title": "/Login",
+        "path": "/login"
+      }
+    }
+  },
+  "404": {
+    "title": "404",
+    "path": "/404"
+  }
+}

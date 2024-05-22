@@ -1,0 +1,501 @@
+# https://github.com/uzairbangee/Gigaland_Backend/blob/master/schema/schema.graphql
+scalar AWSEmail
+scalar AWSPhone
+scalar AWSTimestamp
+scalar AWSURL
+
+type Query{
+    findUser(address:ID!): userAuthData!
+    @aws_api_key
+        
+    authUser: authUserOutput!    
+    @aws_api_key 
+
+    getUserProfile(input: getUserProfileInput!):userShow!
+    @aws_api_key @aws_lambda
+
+    getUsersNfts(input: getUsersNftsInput!): getUsersNftsOutput!
+    @aws_api_key @aws_lambda
+
+    getCollections(input: getCollectionsInput!): getCollectionsOutput!
+    @aws_api_key @aws_lambda
+
+    indexNftAddress(input: indexNftAddressInput!): String!
+    getNftOwners(input: getNftOwnersInput!): getNftOwnersOutput!
+
+    usernameAvailable(username: String!): Boolean!
+    @aws_lambda
+
+	getUserListedNfts(input: getUserListedNftsInput!): getUserListedNftsOutput!
+	@aws_api_key
+   
+    collectionIdAvailable(id: String!): Boolean!
+    @aws_lambda
+
+    getBlockChainStatus(input: getBlockChainStatusInput!): getBlockChainStatusOutput
+    @aws_lambda
+
+    getCollectionInfo(input: getCollectionInfoInput!): Collection
+    @aws_api_key
+
+    getNftInfo(input: getNftInfoInput!): Nft!
+    @aws_api_key @aws_lambda
+
+    searchCollectionByName(input: searchCollectionByNameInput): getCollectionsOutput
+    @aws_api_key @aws_lambda
+
+    getHistoryByNFT(input: getHistoryByNFTInput): getHistoryByNFTOutput
+    @aws_api_key @aws_lambda
+
+    getListedNfts(input: getListedNftsInput!): getListedNftsOutput!
+    @aws_api_key 
+
+    getCollectionNfts(input: getCollectionNftsInput!): getCollectionNftsOutput!
+    @aws_api_key 
+}
+
+
+type Mutation{
+    followUser(input: followUserInput!): String!
+    @aws_lambda
+    listNft(input:listNftInput! ): NftListing!
+    @aws_lambda
+    signup(address: ID!): userAuthData!
+    @aws_api_key
+    authenticate(address: ID!, signature: String!): String!
+    @aws_api_key
+	refreshAccessToken(accessToken: String!): String!
+    @aws_api_key
+    updateProfile(input: updateProfileInput!): user!
+    @aws_lambda
+    createCollection(input: createCollectionInput!): Collection!
+    @aws_lambda
+    updateCollection(input: updateCollectionInput!): Collection!
+    @aws_lambda
+    # addUserToAdminGroup(refId: String!): String!
+    # @aws_lambda
+    mintNft(input: mintNftInput!): Nft!
+    @aws_lambda
+}
+
+input getHistoryByNFTInput {
+    pageSize:Int!
+    before: [String!]
+    tokenId: String!
+    after: [String!]
+    SortingOrderByTime: SORTING_ORDER!
+}
+
+type getHistoryByNFTOutput @aws_api_key {
+    history: [History!]!
+    before: [String]
+    after: [String]
+} 
+
+
+input getListedNftsInput{
+    pageSize:Int!
+    before: [String!]
+    after: [String!]
+    SortingOrderByTime: SORTING_ORDER!
+    listingType: LISTING_TYPE
+    category: [CATEGORY!]
+}
+
+input getCollectionNftsInput{
+    collectionRef:String!
+        pageSize:Int!
+      before: [String!]
+    after: [String!]
+}
+
+type getCollectionNftsOutput @aws_api_key {
+    nfts: [Nft!]!
+    before: [String]
+    after: [String]
+}
+
+type getListedNftsOutput @aws_api_key {
+    listedNfts: [NftListing!]!
+    before: [String]
+    after: [String]
+} 
+
+enum blockChainStatus_type {
+    COLLECTION
+    MINTNFT
+    LISTNFT
+}
+
+input searchCollectionByNameInput {
+    name: String!
+    pageSize:Int!
+    before: [String!]
+    after: [String!]
+}
+
+input getCollectionInfoInput{
+    id: ID!
+}
+
+input getNftInfoInput {
+    tokenId: ID!
+}
+
+input getBlockChainStatusInput{
+statusType: blockChainStatus_type!
+id: ID!
+}
+
+input getCollectionsInput{
+    pageSize:Int!
+    before: [String!]
+    after: [String!]
+}
+
+type getCollectionsOutput {
+    collections: [Collection!]!
+    before: [String]
+    after: [String]
+} 
+
+input mintNftInput {
+    transactionhash: String!
+    collectionId:String!
+    collectionRef: String!
+    imageUrl: String!
+}
+
+input updateProfileInput {
+    username: String
+    displayName: String
+    bio: String
+    email: String
+    coverImage: String
+    profileImage: String
+}
+
+input createCollectionInput {
+    id: String!
+    name: String!
+    description: String
+    royalityInfo: [RoyaltyInfoInput!]!
+    category: CATEGORY
+    coverImage: String
+    profileImage: String
+    transactionhash: String!
+}
+
+input updateCollectionInput {
+    ref: String!
+    name: String
+    description: String
+    category: CATEGORY
+    coverImage: String
+    profileImage: String
+}
+
+type Collection @aws_api_key @aws_lambda {
+    id: String
+    ref: String
+    name: String
+    description: String
+    creatorRef: String
+    royalityInfo: [RoyaltyInfo]
+    category: CATEGORY
+    coverImage: String
+    profileImage: String
+    blockChainStatus: blockChainStatus
+}
+
+input RoyaltyInfoInput {
+    address: String!
+    percentage: Int!
+}
+
+type RoyaltyInfo  @aws_api_key @aws_lambda {
+    address: String
+    percentage: Int
+}
+
+type getBlockChainStatusOutput @aws_lambda {
+status:blockChainStatus!
+data:String
+}
+
+
+type getNftOwnersOutput{
+    data: [nftOwner]!
+    count: Int!
+}
+
+type nftOwner{
+user: user!
+amount: Int!
+}
+
+
+input getUserListedNftsInput {
+	publicAddress: String!
+	status: BLOCKCHAIN_UPDATE_STATUS
+	pageSize: Int!
+	before: [String!]
+	after: [String!]
+	SortingOrderByTime: SORTING_ORDER!
+	listingType: LISTING_TYPE
+	category: [CATEGORY!]
+}
+
+
+input getNftOwnersInput {
+    nftAddress: String!
+    tokenId: String!
+    pageSize:Int!
+    pageNumber:Int!
+}
+
+
+input indexNftAddressInput{
+    nftAddress:String!
+}
+
+input followUserInput {
+    publicAddress:ID!
+}
+
+input getUsersNftsInput {
+	userPublicAddress: ID
+	refId: ID
+	username: ID
+	pageSize: Int!
+	cursor: String
+}
+
+
+input getUserProfileInput{
+    publicAddress:ID
+    refId: ID
+    username: ID
+}
+
+type getUsersNftsOutput @aws_api_key @aws_lambda {
+    data: [Nft]!
+    count: Int!
+    cursor: String
+}
+
+type userAuthData @aws_lambda @aws_api_key {
+   publicAddress: ID!
+   joiningDate: AWSTimestamp
+   nonce: String
+   tokenExpiryDate: AWSTimestamp
+}
+
+type user @aws_lambda @aws_api_key {
+    publicAddress: ID
+    refId: ID
+    username: String
+    isAdmin: Boolean
+    displayName: String
+    bio: String
+    email: String
+    coverImage: String
+    profileImage: String
+    followersCount: Int
+    followingsCount: Int
+}
+
+type userShow @aws_lambda @aws_api_key {
+    publicAddress: ID
+    refId: ID
+    username: String
+    displayName: String
+    bio: String
+    email: String
+    coverImage: String
+    profileImage: String
+    followersCount: Int
+    followingsCount: Int
+    followed: Boolean!
+}
+
+type authUserOutput @aws_lambda @aws_api_key{
+    userData: user!
+    userAuthData: userAuthData!
+}
+
+
+type Nft @aws_api_key
+@aws_lambda {
+	refId: String
+	tokenId: String
+	totalSupply: Int
+	tokenUri: String
+	imageUrl: String
+	collectionRef: String
+	blockChainStatus: blockChainStatus
+	name: String
+	description: String
+	ipfsImageHash: String
+	contractType: CONTRACT_TYPE
+	amount: String
+	blockNumber: Int
+	blockNumberMinted: Int
+	metadata: String
+	syncedAt: String
+}
+
+
+
+enum CONTRACT_TYPE {
+    ERC1155
+    ERC721
+}
+
+
+
+type getUserListedNftsOutput {
+	listedNfts: [NftListing!]!
+	before: [String]
+	after: [String]
+}
+
+
+type NftListing @aws_lambda @aws_api_key {
+    listedBy: ID!
+    listingId: Int
+    listingType: LISTING_TYPE
+    blockChainStatus: blockChainStatus!
+    tokenUri: String
+    tokenId:String!
+    name: String
+    description: String
+    ipfsImageHash: String
+    imageUrl: String
+    price:String
+    listingDate:String
+    transactionHash:String!
+    duration: String
+    amount:Int
+
+
+}
+
+type History {
+    tokenId: String
+    transactionHash:String
+    statusMoralis: Boolean
+    bidPrice: String
+    listPrice: String
+    salePrice: String
+    to: String
+    from: String
+    date: String
+    type: String!
+}
+
+
+input listNftInput{
+    tokenId: String!
+    transactionHash:String!
+}
+
+
+# interface NftListing {
+#     owner: User
+#     timeStamp:AWSTimestamp
+#     contractAddress:String
+#     tokenId: String
+#     imageUrl: String
+#     metaDataUrl: String
+#     EtherscanUrl: String
+#     description:String
+#     category: [CATEGORY!]!
+#     tags: [String!]
+#     listingType: LISTING_TYPE!
+#     status: NFT_STATUS
+   
+# }
+
+enum blockChainStatus{
+  PENDING
+  STARTED
+  CONFIRMED
+  FAILED
+  MANIPULATED
+}
+
+
+# type nftAuctionListing implements NftListing{
+#     owner: User
+#     contractAddress:String
+#     timeStamp:AWSTimestamp
+#     tokenId: String
+#     imageUrl: String
+#     metaDataUrl: String
+#     EtherscanUrl: String
+#     description:String
+#     category: [CATEGORY!]!
+#     tags: [String!]
+#     listingType: LISTING_TYPE! 
+#     auctionEndingDate: AWSTimestamp!
+#     highestBid: Int
+#     status: NFT_STATUS
+#     basePrice:Int
+
+# }
+
+
+# type nftSellListing implements NftListing{
+#     owner: User
+#     contractAddress:String
+#     timeStamp:AWSTimestamp
+#     tokenId: String
+#     imageUrl: String
+#     metaDataUrl: String
+#     EtherscanUrl: String
+#     description:String
+#     category: [CATEGORY!]!
+#     tags: [String!]
+#     listingType: LISTING_TYPE! 
+#     status: NFT_STATUS
+#     sellPrice: Int
+# }
+
+
+
+
+enum LISTING_TYPE{
+    AUCTION
+    SELL
+}
+
+
+
+enum CATEGORY{
+    GAMING
+    ART
+    IMAGES
+}
+
+enum BLOCKCHAIN_UPDATE_STATUS{
+    CONFIRMED
+    STARTED
+    PENDING
+}
+
+enum SORT_BY{
+    date
+    price
+}
+
+enum SORTING_ORDER{
+    ASC
+    DESC
+}
+
+
+# enum NFT_STATUS{
+#     LISTED
+#     SOLD
+# }
