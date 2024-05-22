@@ -1,0 +1,102 @@
+name: MAIN-CICD
+
+on:
+  push:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  Main-deployment:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }} 
+      APPSYNC_GRAPHQL_ENDPOINT: ${{ secrets.APPSYNC_GRAPHQL_ENDPOINT }} 
+      APPSYNC_GRAPHQL_API_KEY: ${{ secrets.APPSYNC_GRAPHQL_API_KEY }} 
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      S3_URL: ${{ secrets.S3_URL }} 
+      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }} 
+      IDENTITY_POOL_ID: ${{ secrets.IDENTITY_POOL_ID }} 
+      USER_POOL_ID: ${{ secrets.USER_POOL_ID }} 
+      USER_POOL_WEB_CLIENT_ID: ${{ secrets.USER_POOL_WEB_CLIENT_ID }} 
+      PINATA_API_KEY: ${{ secrets.PINATA_API_KEY }} 
+      PINATA_API_SECRET: ${{ secrets.PINATA_API_SECRET }} 
+      API_BASE_URL: ${{ secrets.API_BASE_URL  }} 
+      STAGE: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Installing Nodejs
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: '14'          
+
+      - name: Installing Gatsby
+        run: yarn global add gatsby-cli
+
+      # - name: Cache node modules
+      #   id: yarn-cache-dir-path
+      #   run: echo "::set-output name=dir::$(yarn cache dir)"
+      # - uses: actions/cache@v2
+      #   id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      #   with:
+      #     path: |
+      #       ~/.npm
+      #       ${{ steps.yarn-cache-dir-path.outputs.dir }}
+      #       node_modules
+      #       aws-cdk/node_modules
+      #     key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-yarn-
+
+      # - name: Caching Gatsby
+      #   id: gatsby-cache-build
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: |
+      #       public
+      #       .cache
+      #     key: ${{ runner.os }}-gatsby-build-main-${{ github.run_id }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-gatsby-build-main-
+
+      - name: Creating .env.production
+        run: |
+          echo 'APPSYNC_GRAPHQL_API_KEY= ${{ env.APPSYNC_GRAPHQL_API_KEY }}' >> .env.production
+          echo 'APPSYNC_GRAPHQL_ENDPOINT= ${{ env.APPSYNC_GRAPHQL_ENDPOINT }}' >> .env.production
+          echo 'S3_URL= ${{ env.S3_URL }}' >> .env.production
+          echo 'S3_BUCKET_NAME= ${{ env.S3_BUCKET_NAME }}' >> .env.production
+          echo 'AWS_REGION= ${{ env.AWS_REGION }}' >> .env.production
+          echo 'IDENTITY_POOL_ID= ${{ env.IDENTITY_POOL_ID }}' >> .env.production
+          echo 'USER_POOL_ID= ${{ env.USER_POOL_ID }}' >> .env.production
+          echo 'USER_POOL_WEB_CLIENT_ID= ${{ env.USER_POOL_WEB_CLIENT_ID }}' >> .env.production
+          echo 'PINATA_API_KEY= ${{ env.PINATA_API_KEY }}' >> .env.production
+          echo 'PINATA_API_SECRET= ${{ env.PINATA_API_SECRET }}' >> .env.production
+          echo 'API_BASE_URL= ${{ env.API_BASE_URL  }}' >> .env.production
+          echo 'STAGE= ${{ env.STAGE }}' >> .env.production
+
+
+      - name: Moving util from node_modules to tmp
+        run: |
+          mkdir tmp
+          mv node_modules/util/ tmp/
+
+      - name: Installing Frontend dependencies
+        run: yarn
+
+      - name: Moving util from tmp to node_modules
+        run: |
+          mv tmp/util/ node_modules/
+          rmdir tmp
+
+      - name: building site
+        run: yarn build --log-pages
+        env:
+          GATSBY_EXPERIMENTAL_PAGE_BUILD_ON_DATA_CHANGES: true
+          CI: true
+          
+      - name: Deploy Site to netlify
+        run: netlify deploy --dir=public --prod

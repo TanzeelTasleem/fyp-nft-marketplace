@@ -1,0 +1,21 @@
+overwrite: true
+schema: "src/graphql/schema.gql"
+documents: null
+generates:
+  src/graphql/types.ts:
+    plugins:
+      - "typescript"
+      - "typescript-resolvers"
+    config:
+      scalars:
+        AWSPhone: string
+        AWSEmail: string
+        AWSURL: string
+        AWSTimestamp: number
+config:
+  declarationKind: 'interface'
+  useImplementingTypes: true
+  skipTypename: true
+  maybeValue: T
+  namingConvention:
+    enumValues: change-case-all#upperCase
