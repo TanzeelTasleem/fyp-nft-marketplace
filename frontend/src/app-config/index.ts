@@ -11,13 +11,13 @@ const SITE_METADATA = {
 }
 
 const APPSYNC_GRAPHQL = {
-  REGION: process.env.AWS_REGION,
+  REGION: process.env.AWS_REGION_API,
   ENDPOINT: process.env.APPSYNC_GRAPHQL_ENDPOINT,
   API_KEY: process.env.APPSYNC_GRAPHQL_API_KEY,
 };
 
 const S3_BUCKET = {
-  REGION: process.env.AWS_REGION,
+  REGION: process.env.AWS_REGION_API,
   NAME: process.env.S3_BUCKET_NAME,
   URL: process.env.S3_URL,
 };

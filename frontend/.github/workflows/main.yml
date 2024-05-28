@@ -10,7 +10,7 @@ jobs:
   Main-deployment:
     runs-on: ubuntu-latest
     env:
-      AWS_REGION: ${{ secrets.AWS_REGION }} 
+      AWS_REGION_API: ${{ secrets.AWS_REGION_API }} 
       APPSYNC_GRAPHQL_ENDPOINT: ${{ secrets.APPSYNC_GRAPHQL_ENDPOINT }} 
       APPSYNC_GRAPHQL_API_KEY: ${{ secrets.APPSYNC_GRAPHQL_API_KEY }} 
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
@@ -69,7 +69,7 @@ jobs:
           echo 'APPSYNC_GRAPHQL_ENDPOINT= ${{ env.APPSYNC_GRAPHQL_ENDPOINT }}' >> .env.production
           echo 'S3_URL= ${{ env.S3_URL }}' >> .env.production
           echo 'S3_BUCKET_NAME= ${{ env.S3_BUCKET_NAME }}' >> .env.production
-          echo 'AWS_REGION= ${{ env.AWS_REGION }}' >> .env.production
+          echo 'AWS_REGION_API= ${{ env.AWS_REGION_API }}' >> .env.production
           echo 'IDENTITY_POOL_ID= ${{ env.IDENTITY_POOL_ID }}' >> .env.production
           echo 'USER_POOL_ID= ${{ env.USER_POOL_ID }}' >> .env.production
           echo 'USER_POOL_WEB_CLIENT_ID= ${{ env.USER_POOL_WEB_CLIENT_ID }}' >> .env.production
