@@ -130,7 +130,7 @@ const CollectionDetail: FC<RouteComponentProps> = ({ }) => {
               className={
                 loading
                   ? "flex justify-center animate-pulse items-center w-full h-80 bg-zinc-200"
-                  : "flex justify-center items-center w-full h-80  bg-zinc-200"
+                  : "flex justify-center items-center w-full h-80 bg-zinc-200"
               }
             ></div>
           )}

@@ -27,6 +27,12 @@ export class NftContract {
         return res
     }
 
+    public async isApprovedForAll(account: string, operator: string) {
+        const hasApproval = await this.contract.isApprovedForAll(account, operator);
+        console.log("hasApproval", hasApproval)
+        return hasApproval
+    }
+
     public async setApprovalForAll(operator: string) {
         // royalty = BigNumber.from(String(royalty))
         const res = await this.contract.setApprovalForAll(operator, true)
@@ -35,11 +41,27 @@ export class NftContract {
     }
 
     public async isOwner(accountAddress: string) {
-        // royalty = BigNumber.from(String(royalty))
         const res = await this.contract._isOwner(accountAddress)
         console.log("isOwner_res ==>", res);
         return res
     }
+
+    public async balanceOf(account: string, tokenId: ethers.BigNumberish) {
+        // royalty = BigNumber.from(String(royalty))
+        const res = await this.contract.balanceOf(account, tokenId)
+        const balance = BigNumber.from(res._hex).toNumber();
+        console.log("balanceOf_res ==>", balance);
+        return balance
+    }
+
+    public async collectionDetails(collectionId: string) {
+        // royalty = BigNumber.from(String(royalty))
+        const res = await this.contract.nftCollectionDetails(collectionId)
+        // const balance = BigNumber.from(res).toNumber();
+        console.log("collectionDetails_res ==>", res);
+        return res
+    }
+
     // public async maxSupply() {
     //     const { _hex } = await this.contract.maxSupply()
     //     const _maxSupply = BigNumber.from(_hex).toNumber();

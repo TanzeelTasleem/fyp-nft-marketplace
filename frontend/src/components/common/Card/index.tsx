@@ -9,6 +9,8 @@ import { uuid } from '../../../utils/helper';
 import { Button } from '../../common';
 import { BuyNft, PlaceBidModal } from "../../pages/assets/components";
 import Clock from '../Clock';
+import CountDown from '../../../components/pages/assets/components/CountDown';
+import { AuctionDetailsResponse, SellingDetailsResponse, BiddingDetailsResposne } from '../../../block-chain/contract/Market';
 
 const Outer = styled.div`
   display: flex;
@@ -34,7 +36,7 @@ interface CardProps {
     tokenId?: string;
     tokenUri?: string;
     listingId?: number;
-    amount?:string | number;
+    amount?: string | number;
 }
 
 const NFTCard: FC<{ data: CardProps }> = ({ data: { tokenId, listingId, listedBy, currentBlockTime, amount, imageUrl, totalSupply, duration, listingType, name, price } }) => {
@@ -42,7 +44,9 @@ const NFTCard: FC<{ data: CardProps }> = ({ data: { tokenId, listingId, listedBy
     const [height, setHeight] = useState(0)
     const marketContract = useAppSelector(s => s.contract.marketContract);
     const web3Provider = useAppSelector(s => s.web3.provider);
-    const [auctionDetails, setAuctionDetails] = useState<any | null>(null)
+    const [auctionDetails, setAuctionDetails] = useState<AuctionDetailsResponse | null>(null)
+    const [sellingDetails, setSellingDetails] = useState<SellingDetailsResponse | null>(null)
+    const [biddingDetails, setBiddingDetails] = useState<BiddingDetailsResposne | null>(null)
 
     const onImgLoad = ({ target: img }) => {
         // console.log("from image load --->",img);
@@ -54,15 +58,22 @@ const NFTCard: FC<{ data: CardProps }> = ({ data: { tokenId, listingId, listedBy
     }
 
     useEffect(() => {
-        listingType === Listing_Type.AUCTION &&
-            listingId && marketContract?.getAuctionDetails(listingId).then(v => setAuctionDetails(v))
+        listingType === Listing_Type.AUCTION && listingId &&
+            marketContract?.getAuctionDetails(listingId).then(v => { console.log("getAuctionDetails", v); setAuctionDetails(v) }).catch(e => console.log("getAuctionDetails_Error", e))
+
+        listingType === Listing_Type.AUCTION && listingId &&
+            marketContract?.getBiddingDetails(listingId).then(v => { console.log("getBiddingDetails", v); setBiddingDetails(v) }).catch(e => console.log("getBiddingDetails_Error", e))
+
+        listingType === Listing_Type.SELL && typeof listingId === "number" &&
+            marketContract?.getSellingDetails(listingId).then(v => { console.log("getSellingDetails", v); setSellingDetails(v) }).catch(e => console.log("getSellingDetails_Error", e))
+
     }, [listingId])
 
-    console.log(auctionDetails)
+    // console.log(auctionDetails)
 
     return (
         <>
-            <div className="border border-gray-200 hover:shadow-xl cursor-pointer p-3 rounded-2xl max-w-xs" onClick={(e) => navigate(`${PAGES.ASSETS.path}/${tokenId}`)}>
+            <div className="h-full border border-gray-200 hover:shadow-xl cursor-pointer p-3 rounded-2xl max-w-xs" onClick={(e) => navigate(`${PAGES.ASSETS.path}/${tokenId}`)}>
                 {/* { deadline &&
             <div className="de_countdown">
                 <Clock deadline={deadline} />
@@ -81,17 +92,17 @@ const NFTCard: FC<{ data: CardProps }> = ({ data: { tokenId, listingId, listedBy
             </span>
          
         </div> */}
-                <div className='h-[260px] ' >
+                <div className='' >
                     {
                         imageUrl ? (
                             <img
-                            onLoad={onImgLoad}
-                            src={`${S3_BUCKET.URL}/${imageUrl}`}
-                            className=" bg-gray-200 rounded-2xl max-h-64  mx-auto"
-                            alt={name}
-                        />
+                                onLoad={onImgLoad}
+                                src={`${S3_BUCKET.URL}/${imageUrl}`}
+                                className=" bg-gray-200 rounded-2xl max-h-64  mx-auto"
+                                alt={name}
+                            />
                         ) : (
-                            <div className="bg-gray-200 mx-auto rounded-2xl h-64 mb-1.5"/>
+                            <div className="bg-gray-200 mx-auto rounded-2xl max-h-64 mb-1.5" />
                         )
                     }
 
@@ -111,39 +122,47 @@ const NFTCard: FC<{ data: CardProps }> = ({ data: { tokenId, listingId, listedBy
                         {
                             !price && (
                                 <span>x
-                                    <span className='text-black pl-0.5' style={{ color: "black", fontWeight: "bold" }} >{listingType ? listingType === Listing_Type.AUCTION ? 1 : (amount || totalSupply ) : (amount || totalSupply )}</span>
+                                    <span className='text-black pl-0.5' style={{ color: "black", fontWeight: "bold" }} >{listingType ? listingType === Listing_Type.AUCTION ? 1 : (amount || totalSupply) : (amount || totalSupply)}</span>
                                 </span>
                             )
                         }
                     </div>
-                    {listingType === Listing_Type.AUCTION && <div>Base Price</div>}
+                    {listingType === Listing_Type.AUCTION && !biddingDetails?.highestBid && <div>Base Price</div>}
+                    {listingType === Listing_Type.AUCTION && !!biddingDetails?.highestBid && <div>Highest Bid</div>}
                     {listingType === Listing_Type.SELL && <div>Price</div>}
                     <div className="flex justify-between w-full font-semibold text-sm">
                         {price && (
                             <>
                                 <span>
-                                    {ethers.utils.formatEther((price?.toString() || ""))}
+                                    {biddingDetails?.highestBid ?
+                                        ethers.utils.formatEther((biddingDetails.highestBid?.toString())) :
+                                        ethers.utils.formatEther((price?.toString() || ""))
+                                    }
                                     <span className='m-0 pl-0.5 tracking-wide text-black '> MATIC</span>
                                 </span>
-                                {listingType === Listing_Type.SELL && <span>x
-                                    <span className='text-black pl-0.5'>{(amount || totalSupply )}</span>
+                                {listingType === Listing_Type.SELL && sellingDetails && <span>x
+                                    <span className='text-black pl-0.5'>{(sellingDetails.amount - sellingDetails.soldAmount)}</span>
                                 </span>}
                             </>
                         )
                         }
 
                     </div>
-                    {listingType === Listing_Type.AUCTION && currentBlockTime && !!auctionDetails?.endingUnix &&
-                        <div className='text-right text-sm'>
-                            {getPassedTime(currentBlockTime, auctionDetails.endingUnix).unit}
-                            {getPassedTime(currentBlockTime, auctionDetails.endingUnix).time} left: ;
-                        </div>}
-                    {listingType === Listing_Type.AUCTION && !auctionDetails?.endingUnix &&
+
+                    {listingType === Listing_Type.AUCTION && currentBlockTime && !!auctionDetails?.endingDate &&
+                        // <div className='text-right text-sm'>
+                        //     {getPassedTime(currentBlockTime, auctionDetails.endingUnix).unit}
+                        //     {getPassedTime(currentBlockTime, auctionDetails.endingUnix).time} left: ;
+                        // </div>
+                        <CountDown endingTime={auctionDetails.endingDate} />
+
+                    }
+                    {listingType === Listing_Type.AUCTION && !auctionDetails?.endingDate &&
                         <div className='text-center mt-1 text-sm'>Be the first to bid</div>}
-                    <div className='mt-2' >
-                        {/* <span onClick={()=> window.open("#", "_self")}>Buy Now</span> */}
-                        {/* <Button className='text-sm' >Buy Now</Button> */}
-                        {/* {price && tokenId && name && totalSupply && listingType === Listing_Type.SELL &&
+                    {/* <div className='mt-2' > */}
+                    {/* <span onClick={()=> window.open("#", "_self")}>Buy Now</span> */}
+                    {/* <Button className='text-sm' >Buy Now</Button> */}
+                    {/* {price && tokenId && name && totalSupply && listingType === Listing_Type.SELL &&
                             <BuyNft
                                 totalSupply={totalSupply} assetId={tokenId} assetName={name}
                                 collectionName={""} imgUrl={imageUrl} price={price}
@@ -153,7 +172,7 @@ const NFTCard: FC<{ data: CardProps }> = ({ data: { tokenId, listingId, listedBy
                                 assetId={tokenId} assetName={name}
                                 collectionName={""} imgUrl={imageUrl} price={price}
                             />} */}
-                    </div>
+                    {/* </div> */}
                     {/* <div className="nft__item_like">
                 <i className="fa fa-heart"></i><span>{likes}</span>
             </div>                             */}

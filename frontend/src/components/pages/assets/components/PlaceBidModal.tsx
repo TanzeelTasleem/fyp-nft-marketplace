@@ -4,18 +4,20 @@ import React, { FC, useState } from 'react'
 import { S3_BUCKET } from '../../../../app-config';
 import { useAppSelector } from '../../../../redux/store';
 import { checkBlockChainStatus, uuid } from '../../../../utils/helper';
-import { Backdrop, Button } from '../../../common'
+import { Backdrop, Button, Spinner } from '../../../common'
 
 interface Props {
    assetId: string;
    assetName: string;
    collectionName: string;
-   price: string;
+   baseprice: string | number;
+   highestPrice?: string | number;
    imgUrl?: string;
+   listingId: string;
 
 }
 
-const PlaceBidModal: FC<Props> = ({ assetId, imgUrl, assetName, collectionName, price, }) => {
+const PlaceBidModal: FC<Props> = ({ assetId, imgUrl, assetName, listingId, collectionName, baseprice, highestPrice }) => {
    const [open, setOpen] = useState(false);
    const handleOpen = () => { setOpen(true) }
    const handleClose = () => { setOpen(false) }
@@ -23,18 +25,38 @@ const PlaceBidModal: FC<Props> = ({ assetId, imgUrl, assetName, collectionName, 
    const { marketContract } = useAppSelector(s => s.contract);
    const showDialog = useAppSelector(s => s.alerts.showDialog);
    // ethers.utils.formatUnits(weiValue, "gwei");
+   const [loading, setLoading] = useState(false);
 
    const handlePlaceBid = async () => {
-      console.log(bidValue)
-      if (!bidValue) { return }
-      // bidValue && console.log(ethers.utils.parseEther(bidValue).toString())
-      const transaction = await marketContract?.placeBid(assetId, bidValue);
+      console.log(bidValue);
+      const lastBidPrice = highestPrice ?
+         ethers.utils.formatEther((highestPrice.toString())) :
+         ethers.utils.formatEther((baseprice.toString()))
 
-      const transactionReceipt = await transaction?.wait();
-      console.log("Transaction completed: ", transactionReceipt);
-      handleClose()
-      showDialog("success", "Congratulations!", "You have successfully bid on this NFT.")
-      // showDialog("success", "Congratulations!", "you own this asset now.")
+      if (Number(bidValue) <= Number(lastBidPrice)) {
+         showDialog("error", "Error!", "Bid price must be greater than the last price.");
+         return
+      }
+      if (!bidValue) { return }
+      setLoading(true);
+      try {
+         // bidValue && console.log(ethers.utils.parseEther(bidValue).toString())
+         const transaction = await marketContract?.placeBid(listingId, bidValue);
+         const transactionReceipt = await transaction?.wait();
+         console.log("Transaction completed: ", transactionReceipt);
+         handleClose()
+         showDialog("success", "Congratulations!", "You have successfully bid on this NFT.");
+      } catch (error) {
+         console.log("handlePlaceBid_ERROR", Object.entries(error as any));
+         if ((error as any)?.data?.message) {
+            showDialog("error", "Error!", (error as any)?.data.message);
+         } else if ((error as any)?.code) {
+            showDialog("error", "Error!", (error as any)?.code);
+         } else {
+            showDialog("error", "Error!", "Some thing went wrong");
+         }
+      }
+      setLoading(false);
    }
 
    return (
@@ -47,20 +69,23 @@ const PlaceBidModal: FC<Props> = ({ assetId, imgUrl, assetName, collectionName, 
                      Place a bid <XIcon onClick={handleClose} className='float-right sm:w-7 w-5 cursor-pointer' />
                   </h3>
                   <div className='flex space-x-1 items-center' >
-                     <div className='bg-slate-300 min-w-[56px] h-14' >
+                     <div className='flex justify-center items-center bg-slate-300 min-w-[56px] min-h-[56px] rounded-2xl' >
                         {imgUrl && <img
                            src={`${S3_BUCKET.URL}/${imgUrl}?${uuid()}`}
-                           className=" bg-gray-200 mx-auto rounded-2xl max-h-64 mb-1.5 "
+                           className=" bg-gray-200 mx-auto max-h-36 mb-1.5 rounded-2xl"
                            alt=""
                         />}
                      </div>
                      <div className='w-full'>
-                        <p>{collectionName}</p>
+                        <p className='mb-1'>{collectionName}</p>
                         <p>{assetName} #{assetId}</p>
                      </div>
-                     <div className='text-[13px] leading-[2px] w-[120px]' >
-                        <p>Base price:</p>
-                        <p >{ethers.utils.formatEther((price.toString()))} <b className='font-bold' >MATIC</b></p>
+                     <div className='text-[13px] leading-[2px] w-[150px]' >
+                        <p className='text-right'>{highestPrice ? "Highest Bid:" : "Base Price:"}</p>
+                        <p className='text-right' >
+                           {highestPrice ? ethers.utils.formatEther((highestPrice.toString())) : ethers.utils.formatEther((baseprice.toString()))}
+                           <b className='font-bold' >MATIC</b>
+                        </p>
                      </div>
                   </div>
                   <br />
@@ -73,7 +98,15 @@ const PlaceBidModal: FC<Props> = ({ assetId, imgUrl, assetName, collectionName, 
                   </div>
                   <br />
                   <div className='flex justify-center p-3' >
-                     <Button disabled={!bidValue} onClick={handlePlaceBid} className='text-sm' >Place Bid</Button>
+                     {/* <Button disabled={!bidValue} onClick={handlePlaceBid} className='text-sm' >Place Bid</Button> */}
+                     <Button disabled={loading} onClick={handlePlaceBid} className='text-sm' >
+                        {loading ?
+                           <span className="mr-1">
+                              <Spinner width={15} height={15} />
+                           </span> :
+                           "Place Bid"
+                        }
+                     </Button>
                   </div>
                </div>
             </Backdrop>}

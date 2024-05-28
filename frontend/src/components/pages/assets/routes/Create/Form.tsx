@@ -81,8 +81,8 @@ const CreateNFTForm: FC<Props> = ({ collectionInfo }) => {
             console.log("pin file data ==>", pinFileToIPFS)
 
             setSubmittingStatus("Uploading file to S3")
-            // const { key: nftImgS3Key } = await handleUploadImage(collectionId, nftImage, assetName, nftImage.type);
-            const nftImgS3Key = await uploadToS3({ file: nftImage, filePath: `nft/${assetName}/profile` });
+            let nftImgS3Key = await uploadToS3({ file: nftImage, filePath: `nft/${Date.now() + Math.floor(Math.random() * 100)}` });
+            nftImgS3Key = atob(nftImgS3Key);
 
             setSubmittingStatus("Pinning file Meta to IPFS")
             const nftMeta: NFTmeta = {

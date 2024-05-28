@@ -116,6 +116,7 @@ const Default: FC<RouteComponentProps> = ({ }) => {
   const [hasMore, setHasMore] = useState(false);
   const web3Provider = useAppSelector(s => s.web3.provider);
   const [currentBlockTime, setCurrentBlockTime] = useState(0);
+  const nftContract = useAppSelector(s=>s.contract.nftContract);
 
 
   const loadDataByFilter = async (i: { category?: string, listingType?: string, sortBy?: string }) => {
@@ -165,6 +166,7 @@ const Default: FC<RouteComponentProps> = ({ }) => {
 
   useEffect(() => {
     handleLoadData()
+    nftContract?.collectionDetails("crypto-punks")
   }, [])
 
   useEffect(() => {

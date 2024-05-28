@@ -32,7 +32,7 @@ let formInitialValues: FormFields = {
    listingType: "FIXED_PRICED",
    price: "",
    basePrice: "",
-   numberOfTokens: "",
+   numberOfTokens: "1",
    // durationInSecs: "",
 };
 
@@ -40,22 +40,37 @@ let formInitialValues: FormFields = {
 
 const ListNftForm: FC<{ assetId: number, nftInfo: Nft, nftMeta?: NFTmeta }> = ({ assetId, nftInfo, nftMeta }) => {
    const { marketContract, nftContract } = useAppSelector(s => s.contract);
+   const { userData } = useAppSelector(s => s.userAuth);
    const [submittingStatus, setSubmittingStatus] = useState<string | null>(null);
    const showDialog = useAppSelector(s => s.alerts.showDialog);
    // const [loading, setLoading] = useState(false);
    // const [nftInfo, setNftInfo] = useState<Nft>();
    // const [nftMeta, setNftmeta] = useState<NFTmeta>();
-   const isAuctionAllowed = (nftInfo?.totalSupply || 0) === 1;
+   const isAuctionAllowed = Number(nftInfo?.amount || 0) === 1;
+
+   // useEffect(() => {
+
+   //    // marketContract && nftContract && nftContract.setApprovalForAll(marketContract.ADDRESS)
+   //    // marketContract && nftContract && userData?.publicAddress &&
+   //    // nftContract.isApprovedForAll(userData?.publicAddress, marketContract.ADDRESS);
+   //    //    then(() => {
+   //    //    })
+
+   // }, [marketContract, nftContract])
 
    const handleSubmit = async (values: FormFields, { setSubmitting }: FormikHelpers<FormFields>) => {
       console.log("Details Received", values);
       if (!marketContract || !nftContract) { console.log("contract not found"); return }
-      let {  numberOfTokens, listingType, price, basePrice } = values;
+      if (!userData?.publicAddress) { console.log("user publicAddress not found"); return }
+      let { numberOfTokens, listingType, price, basePrice } = values;
       numberOfTokens = isAuctionAllowed ? "1" : numberOfTokens;
 
-      const approveTx = await nftContract.setApprovalForAll(marketContract.ADDRESS);
-      const approveTransactionReceipt = await approveTx?.wait();
-      console.log("approveTransactionReceipt", approveTransactionReceipt)
+      const hasApproval = await nftContract.isApprovedForAll(userData.publicAddress, marketContract.ADDRESS);
+      if (!hasApproval) {
+         const approveTx = await nftContract.setApprovalForAll(marketContract.ADDRESS);
+         const approveTransactionReceipt = await approveTx?.wait();
+         console.log("approveTransactionReceipt", approveTransactionReceipt)
+      }
 
       let transaction: ContractTransaction | null = null;
       if (listingType === "FIXED_PRICED") {
@@ -79,7 +94,6 @@ const ListNftForm: FC<{ assetId: number, nftInfo: Nft, nftMeta?: NFTmeta }> = ({
 
    }
 
-
    const handleValidateForm = (values: FormFields) => {
       const error: { [P in keyof FormFields]?: string; } = {}
       if (values.listingType === "TIMED_AUCTION") {
@@ -98,7 +112,7 @@ const ListNftForm: FC<{ assetId: number, nftInfo: Nft, nftMeta?: NFTmeta }> = ({
          if (!isAuctionAllowed && !values.numberOfTokens) {
             error.numberOfTokens = "Required";
          }
-         if (Number(values.numberOfTokens) > (nftInfo?.totalSupply || 0)) {
+         if (Number(values.numberOfTokens) > Number(nftInfo?.amount || 0)) {
             error.numberOfTokens = "Insufficient tokens";
          }
       }
@@ -167,8 +181,8 @@ const ListNftForm: FC<{ assetId: number, nftInfo: Nft, nftMeta?: NFTmeta }> = ({
 
                {values.listingType === "FIXED_PRICED" && !isAuctionAllowed && <>
                   <h5>Number Of Tokens*</h5>
-                  <Input data-autoresize type='text' defaultValue={isAuctionAllowed ? "1" : ""} onChange={e => { filterNumber({ e, handleChange }) }} name="numberOfTokens" className="form-control mb-1" />
-                  <p><b>Remaining: </b>{nftInfo?.totalSupply! - (+values.numberOfTokens!)}</p>
+                  <Input data-autoresize type='text' onChange={e => { filterNumber({ e, handleChange }) }} name="numberOfTokens" className="form-control mb-1" />
+                  <p><b>Remaining: </b>{Number(nftInfo?.amount || 0) - (+values.numberOfTokens!)}</p>
                </>}
                {/* {values.listingType === "TIMED_AUCTION" && <>
                   <h5>Auction Duration*</h5>
@@ -188,7 +202,7 @@ const ListNftForm: FC<{ assetId: number, nftInfo: Nft, nftMeta?: NFTmeta }> = ({
    )
 }
 
-export default ListNftForm
+export default ListNftForm;
 
 
 const filterNumber = ({ e, handleChange, include = [] }: {

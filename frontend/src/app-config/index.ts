@@ -40,8 +40,8 @@ const SUPPORTED_CHAINS =
   id: 11155111, // Sepolia testnet chain ID
   name: "Sepolia",
   walletDetails: {
-    chainId: '0xaa36a7', // Sepolia testnet chain ID in hexadecimal
-    rpcUrls: ["https://rpc.sepolia.org/"], // Replace with your Infura project ID
+    chainId: '0xaa36a7',
+    rpcUrls: ["https://rpc.sepolia.org/"],
     chainName: "Sepolia",
     nativeCurrency: {
       name: "ETH",

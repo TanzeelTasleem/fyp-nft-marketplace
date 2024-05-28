@@ -23,6 +23,8 @@ const ListNft: FC<RouteComponentProps> = ({ location }) => {
   const [nftInfo, setNftInfo] = useState<Nft | undefined>(windowState?.nftInfo);
   const [nftMeta, setNftmeta] = useState<NFTmeta | undefined>(windowState?.nftMeta);
   const [isError, setIsError] = useState<GraphQLResult<any> | null>();
+  const { nftContract } = useAppSelector(s => s.contract);
+  // const [userNonListedTokenBalnace, setUserNonListedTokenBalance] = useState<number | null>(null);
 
 
   const fetchNftInfo = async () => {
@@ -35,8 +37,12 @@ const ListNft: FC<RouteComponentProps> = ({ location }) => {
           variables: { input: { tokenId: assetId }, } as QueryGetNftInfoArgs,
         },
           { "x-api-key": APPSYNC_GRAPHQL.API_KEY! }
-        ) as GraphQLResult<{ getNftInfo: Nft }>).data
-        setNftInfo(data?.getNftInfo);
+        ) as GraphQLResult<{ getNftInfo: Nft }>).data;
+
+        const userNonListedTokenBalnace = nftContract && userData?.publicAddress &&
+          nftContract.balanceOf(userData.publicAddress, assetId);
+
+        setNftInfo({ ...data?.getNftInfo, amount: userNonListedTokenBalnace?.toString() });
       }
       if (!nftMeta) {
         await fetchNftmetaFromIPFS(data?.getNftInfo.tokenUri || nftInfo?.tokenUri!)
@@ -65,6 +71,7 @@ const ListNft: FC<RouteComponentProps> = ({ location }) => {
   useEffect(() => {
     fetchNftInfo()
   }, [])
+
 
   useEffect(() => {
     if (authState && authState === 'SIGNED_OUT') {
@@ -109,7 +116,7 @@ const ListNft: FC<RouteComponentProps> = ({ location }) => {
       </section>
 
       <section className="container">
-        {(!nftInfo || loading) ?
+        {(!nftInfo?.tokenId || loading) ?
           <div className="text-center mt-20" >
             <Spinner />
           </div> :

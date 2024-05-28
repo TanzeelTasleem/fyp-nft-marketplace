@@ -1,4 +1,3 @@
-# https://github.com/uzairbangee/Gigaland_Backend/blob/master/schema/schema.graphql
 scalar AWSEmail
 scalar AWSPhone
 scalar AWSTimestamp
@@ -21,13 +20,18 @@ type Query{
     @aws_api_key @aws_lambda
 
     indexNftAddress(input: indexNftAddressInput!): String!
+
     getNftOwners(input: getNftOwnersInput!): getNftOwnersOutput!
+    @aws_api_key
+
+     getNftListingsOfSameToken(input: getNftListingsOfSameTokenInput!): getNftListingsOfSameTokenOutput!
+    @aws_api_key
 
     usernameAvailable(username: String!): Boolean!
     @aws_lambda
 
-	getUserListedNfts(input: getUserListedNftsInput!): getUserListedNftsOutput!
-	@aws_api_key
+    getUserListedNfts(input: getUserListedNftsInput!): getUserListedNftsOutput!
+    @aws_api_key
    
     collectionIdAvailable(id: String!): Boolean!
     @aws_lambda
@@ -38,7 +42,7 @@ type Query{
     getCollectionInfo(input: getCollectionInfoInput!): Collection
     @aws_api_key
 
-    getNftInfo(input: getNftInfoInput!): Nft!
+    getNftInfo(input: getNftInfoInput!): getNftInfoOutput!
     @aws_api_key @aws_lambda
 
     searchCollectionByName(input: searchCollectionByNameInput): getCollectionsOutput
@@ -52,6 +56,9 @@ type Query{
 
     getCollectionNfts(input: getCollectionNftsInput!): getCollectionNftsOutput!
     @aws_api_key 
+
+    refreshMetaData(input: refreshMetaDataInput!): Boolean!
+    @aws_api_key
 }
 
 
@@ -92,6 +99,20 @@ type getHistoryByNFTOutput @aws_api_key {
     after: [String]
 } 
 
+type getNftInfoOutput @aws_api_key @aws_lambda {
+
+nftInfo: Nft!
+collectionInfo: Collection!
+listingInfo: NftListingInfo
+}
+
+type NftListingInfo  @aws_api_key @aws_lambda  {
+isListed:Boolean
+listingType: LISTING_TYPE
+listingId: String
+price: String
+}
+
 
 input getListedNftsInput{
     pageSize:Int!
@@ -100,6 +121,10 @@ input getListedNftsInput{
     SortingOrderByTime: SORTING_ORDER!
     listingType: LISTING_TYPE
     category: [CATEGORY!]
+}
+
+input refreshMetaDataInput {
+    tokenId: String!
 }
 
 input getCollectionNftsInput{
@@ -227,31 +252,57 @@ data:String
 type getNftOwnersOutput{
     data: [nftOwner]!
     count: Int!
+    cursor:String
+}
+
+type getNftListingsOfSameTokenOutput {
+    data: [nftOwner]!
+    before: [String]
+    after: [String]
 }
 
 type nftOwner{
-user: user!
-amount: Int!
+userPublicAddress: String
+username:String
+amount: Int
+profileImage: String
+refId:String
+displayName:String
+listingInfo: nftOwnerListingInfo
+}
+
+type nftOwnerListingInfo{
+amount: Int
+price: String
+listingId: Int
 }
 
 
-input getUserListedNftsInput {
-	publicAddress: String!
-	status: BLOCKCHAIN_UPDATE_STATUS
-	pageSize: Int!
-	before: [String!]
-	after: [String!]
-	SortingOrderByTime: SORTING_ORDER!
-	listingType: LISTING_TYPE
-	category: [CATEGORY!]
+input getUserListedNftsInput{
+    publicAddress: String!
+    status: BLOCKCHAIN_UPDATE_STATUS
+    pageSize:Int!
+    before: [String!]
+    after: [String!]
+    SortingOrderByTime: SORTING_ORDER!
+    listingType: LISTING_TYPE
+    category: [CATEGORY!]
+   
 }
+
 
 
 input getNftOwnersInput {
-    nftAddress: String!
     tokenId: String!
-    pageSize:Int!
-    pageNumber:Int!
+    limit:Int
+    cursor:String
+}
+
+input getNftListingsOfSameTokenInput {
+    tokenId:String!
+    pageSize:Int
+     before: [String!]
+    after: [String!]
 }
 
 
@@ -264,11 +315,11 @@ input followUserInput {
 }
 
 input getUsersNftsInput {
-	userPublicAddress: ID
-	refId: ID
-	username: ID
-	pageSize: Int!
-	cursor: String
+  userPublicAddress:ID
+  refId: ID
+  username: ID
+  pageSize: Int!
+  cursor: String
 }
 
 
@@ -325,25 +376,27 @@ type authUserOutput @aws_lambda @aws_api_key{
 }
 
 
-type Nft @aws_api_key
-@aws_lambda {
-	refId: String
-	tokenId: String
-	totalSupply: Int
-	tokenUri: String
-	imageUrl: String
-	collectionRef: String
-	blockChainStatus: blockChainStatus
-	name: String
-	description: String
-	ipfsImageHash: String
-	contractType: CONTRACT_TYPE
-	amount: String
-	blockNumber: Int
-	blockNumberMinted: Int
-	metadata: String
-	syncedAt: String
+type Nft @aws_api_key @aws_lambda {
+    refId: String
+    tokenId: String
+    totalSupply: Int
+    tokenUri: String
+    imageUrl: String
+    collectionRef: String
+    blockChainStatus: blockChainStatus
+    transactionHash: String
+    name: String
+    description: String
+    ipfsImageHash: String
+    contractType: CONTRACT_TYPE
+    amount: String
+    blockNumber: Int
+    blockNumberMinted: Int
+    metadata: String
+    syncedAt: String
+
 }
+
 
 
 
@@ -355,10 +408,10 @@ enum CONTRACT_TYPE {
 
 
 type getUserListedNftsOutput {
-	listedNfts: [NftListing!]!
-	before: [String]
-	after: [String]
-}
+    listedNfts: [NftListing!]!
+    before: [String]
+    after: [String]
+} 
 
 
 type NftListing @aws_lambda @aws_api_key {
@@ -400,23 +453,6 @@ input listNftInput{
     transactionHash:String!
 }
 
-
-# interface NftListing {
-#     owner: User
-#     timeStamp:AWSTimestamp
-#     contractAddress:String
-#     tokenId: String
-#     imageUrl: String
-#     metaDataUrl: String
-#     EtherscanUrl: String
-#     description:String
-#     category: [CATEGORY!]!
-#     tags: [String!]
-#     listingType: LISTING_TYPE!
-#     status: NFT_STATUS
-   
-# }
-
 enum blockChainStatus{
   PENDING
   STARTED
@@ -424,45 +460,6 @@ enum blockChainStatus{
   FAILED
   MANIPULATED
 }
-
-
-# type nftAuctionListing implements NftListing{
-#     owner: User
-#     contractAddress:String
-#     timeStamp:AWSTimestamp
-#     tokenId: String
-#     imageUrl: String
-#     metaDataUrl: String
-#     EtherscanUrl: String
-#     description:String
-#     category: [CATEGORY!]!
-#     tags: [String!]
-#     listingType: LISTING_TYPE! 
-#     auctionEndingDate: AWSTimestamp!
-#     highestBid: Int
-#     status: NFT_STATUS
-#     basePrice:Int
-
-# }
-
-
-# type nftSellListing implements NftListing{
-#     owner: User
-#     contractAddress:String
-#     timeStamp:AWSTimestamp
-#     tokenId: String
-#     imageUrl: String
-#     metaDataUrl: String
-#     EtherscanUrl: String
-#     description:String
-#     category: [CATEGORY!]!
-#     tags: [String!]
-#     listingType: LISTING_TYPE! 
-#     status: NFT_STATUS
-#     sellPrice: Int
-# }
-
-
 
 
 enum LISTING_TYPE{
@@ -493,9 +490,3 @@ enum SORTING_ORDER{
     ASC
     DESC
 }
-
-
-# enum NFT_STATUS{
-#     LISTED
-#     SOLD
-# }

@@ -128,7 +128,9 @@ export interface BasicSellingResponse {
   4: BigNumber
   cancelled: boolean
   5: boolean
-  length: 6
+  soldAmount: BigNumber
+  6: BigNumber
+  length: 7
 }
 export interface BidsResponse {
   highestBid: BigNumber
@@ -203,9 +205,11 @@ export interface Market {
    * StateMutability: payable
    * Type: function
    * @param _listingId Type: uint256, Indexed: false
+   * @param _amount Type: uint256, Indexed: false
    */
   buyNft(
     _listingId: BigNumberish,
+    _amount: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction>
   /**

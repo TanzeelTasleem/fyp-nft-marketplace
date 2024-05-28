@@ -115,8 +115,8 @@ const CreateCollection: FC<RouteComponentProps> = ({ }) => {
       navigate("/");
     }
     else if (!userData?.isAdmin) {
-      console.log(!userData?.isAdmin , "userData ???");
-      
+      console.log(!userData?.isAdmin, "userData ???");
+
       navigate("/");
     }
 

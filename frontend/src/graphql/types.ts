@@ -141,6 +141,7 @@ export interface Nft {
   tokenId?: Maybe<Scalars['String']>;
   tokenUri?: Maybe<Scalars['String']>;
   totalSupply?: Maybe<Scalars['Int']>;
+  transactionHash?: Maybe<Scalars['String']>;
 }
 
 export interface NftListing {
@@ -161,6 +162,13 @@ export interface NftListing {
   transactionHash: Scalars['String'];
 }
 
+export interface NftListingInfo {
+  isListed?: Maybe<Scalars['Boolean']>;
+  listingId?: Maybe<Scalars['String']>;
+  listingType?: Maybe<Listing_Type>;
+  price?: Maybe<Scalars['String']>;
+}
+
 export interface Query {
   authUser: AuthUserOutput;
   collectionIdAvailable: Scalars['Boolean'];
@@ -171,12 +179,14 @@ export interface Query {
   getCollections: GetCollectionsOutput;
   getHistoryByNFT?: Maybe<GetHistoryByNftOutput>;
   getListedNfts: GetListedNftsOutput;
-  getNftInfo: Nft;
+  getNftInfo: GetNftInfoOutput;
+  getNftListingsOfSameToken: GetNftListingsOfSameTokenOutput;
   getNftOwners: GetNftOwnersOutput;
   getUserListedNfts: GetUserListedNftsOutput;
   getUserProfile: UserShow;
   getUsersNfts: GetUsersNftsOutput;
   indexNftAddress: Scalars['String'];
+  refreshMetaData: Scalars['Boolean'];
   searchCollectionByName?: Maybe<GetCollectionsOutput>;
   usernameAvailable: Scalars['Boolean'];
 }
@@ -227,6 +237,11 @@ export interface QueryGetNftInfoArgs {
 }
 
 
+export interface QueryGetNftListingsOfSameTokenArgs {
+  input: GetNftListingsOfSameTokenInput;
+}
+
+
 export interface QueryGetNftOwnersArgs {
   input: GetNftOwnersInput;
 }
@@ -249,6 +264,11 @@ export interface QueryGetUsersNftsArgs {
 
 export interface QueryIndexNftAddressArgs {
   input: IndexNftAddressInput;
+}
+
+
+export interface QueryRefreshMetaDataArgs {
+  input: RefreshMetaDataInput;
 }
 
 
@@ -387,15 +407,34 @@ export interface GetNftInfoInput {
   tokenId: Scalars['ID'];
 }
 
+export interface GetNftInfoOutput {
+  collectionInfo: Collection;
+  listingInfo?: Maybe<NftListingInfo>;
+  nftInfo: Nft;
+}
+
+export interface GetNftListingsOfSameTokenInput {
+  after?: InputMaybe<Array<Scalars['String']>>;
+  before?: InputMaybe<Array<Scalars['String']>>;
+  pageSize?: InputMaybe<Scalars['Int']>;
+  tokenId: Scalars['String'];
+}
+
+export interface GetNftListingsOfSameTokenOutput {
+  after?: Maybe<Array<Maybe<Scalars['String']>>>;
+  before?: Maybe<Array<Maybe<Scalars['String']>>>;
+  data: Array<Maybe<NftOwner>>;
+}
+
 export interface GetNftOwnersInput {
-  nftAddress: Scalars['String'];
-  pageNumber: Scalars['Int'];
-  pageSize: Scalars['Int'];
+  cursor?: InputMaybe<Scalars['String']>;
+  limit?: InputMaybe<Scalars['Int']>;
   tokenId: Scalars['String'];
 }
 
 export interface GetNftOwnersOutput {
   count: Scalars['Int'];
+  cursor?: Maybe<Scalars['String']>;
   data: Array<Maybe<NftOwner>>;
 }
 
@@ -453,8 +492,23 @@ export interface MintNftInput {
 }
 
 export interface NftOwner {
-  amount: Scalars['Int'];
-  user: User;
+  amount?: Maybe<Scalars['Int']>;
+  displayName?: Maybe<Scalars['String']>;
+  listingInfo?: Maybe<NftOwnerListingInfo>;
+  profileImage?: Maybe<Scalars['String']>;
+  refId?: Maybe<Scalars['String']>;
+  userPublicAddress?: Maybe<Scalars['String']>;
+  username?: Maybe<Scalars['String']>;
+}
+
+export interface NftOwnerListingInfo {
+  amount?: Maybe<Scalars['Int']>;
+  listingId?: Maybe<Scalars['Int']>;
+  price?: Maybe<Scalars['String']>;
+}
+
+export interface RefreshMetaDataInput {
+  tokenId: Scalars['String'];
 }
 
 export interface SearchCollectionByNameInput {
@@ -602,6 +656,7 @@ export type ResolversTypes = {
   Mutation: ResolverTypeWrapper<{}>;
   Nft: ResolverTypeWrapper<Nft>;
   NftListing: ResolverTypeWrapper<NftListing>;
+  NftListingInfo: ResolverTypeWrapper<NftListingInfo>;
   Query: ResolverTypeWrapper<{}>;
   RoyaltyInfo: ResolverTypeWrapper<RoyaltyInfo>;
   RoyaltyInfoInput: RoyaltyInfoInput;
@@ -625,6 +680,9 @@ export type ResolversTypes = {
   getListedNftsInput: GetListedNftsInput;
   getListedNftsOutput: ResolverTypeWrapper<GetListedNftsOutput>;
   getNftInfoInput: GetNftInfoInput;
+  getNftInfoOutput: ResolverTypeWrapper<GetNftInfoOutput>;
+  getNftListingsOfSameTokenInput: GetNftListingsOfSameTokenInput;
+  getNftListingsOfSameTokenOutput: ResolverTypeWrapper<GetNftListingsOfSameTokenOutput>;
   getNftOwnersInput: GetNftOwnersInput;
   getNftOwnersOutput: ResolverTypeWrapper<GetNftOwnersOutput>;
   getUserListedNftsInput: GetUserListedNftsInput;
@@ -636,6 +694,8 @@ export type ResolversTypes = {
   listNftInput: ListNftInput;
   mintNftInput: MintNftInput;
   nftOwner: ResolverTypeWrapper<NftOwner>;
+  nftOwnerListingInfo: ResolverTypeWrapper<NftOwnerListingInfo>;
+  refreshMetaDataInput: RefreshMetaDataInput;
   searchCollectionByNameInput: SearchCollectionByNameInput;
   updateCollectionInput: UpdateCollectionInput;
   updateProfileInput: UpdateProfileInput;
@@ -658,6 +718,7 @@ export type ResolversParentTypes = {
   Mutation: {};
   Nft: Nft;
   NftListing: NftListing;
+  NftListingInfo: NftListingInfo;
   Query: {};
   RoyaltyInfo: RoyaltyInfo;
   RoyaltyInfoInput: RoyaltyInfoInput;
@@ -677,6 +738,9 @@ export type ResolversParentTypes = {
   getListedNftsInput: GetListedNftsInput;
   getListedNftsOutput: GetListedNftsOutput;
   getNftInfoInput: GetNftInfoInput;
+  getNftInfoOutput: GetNftInfoOutput;
+  getNftListingsOfSameTokenInput: GetNftListingsOfSameTokenInput;
+  getNftListingsOfSameTokenOutput: GetNftListingsOfSameTokenOutput;
   getNftOwnersInput: GetNftOwnersInput;
   getNftOwnersOutput: GetNftOwnersOutput;
   getUserListedNftsInput: GetUserListedNftsInput;
@@ -688,6 +752,8 @@ export type ResolversParentTypes = {
   listNftInput: ListNftInput;
   mintNftInput: MintNftInput;
   nftOwner: NftOwner;
+  nftOwnerListingInfo: NftOwnerListingInfo;
+  refreshMetaDataInput: RefreshMetaDataInput;
   searchCollectionByNameInput: SearchCollectionByNameInput;
   updateCollectionInput: UpdateCollectionInput;
   updateProfileInput: UpdateProfileInput;
@@ -769,6 +835,7 @@ export type NftResolvers<ContextType = any, ParentType extends ResolversParentTy
   tokenId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   tokenUri?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   totalSupply?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  transactionHash?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -791,6 +858,14 @@ export type NftListingResolvers<ContextType = any, ParentType extends ResolversP
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type NftListingInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['NftListingInfo'] = ResolversParentTypes['NftListingInfo']> = {
+  isListed?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  listingId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  listingType?: Resolver<Maybe<ResolversTypes['LISTING_TYPE']>, ParentType, ContextType>;
+  price?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   authUser?: Resolver<ResolversTypes['authUserOutput'], ParentType, ContextType>;
   collectionIdAvailable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<QueryCollectionIdAvailableArgs, 'id'>>;
@@ -801,12 +876,14 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getCollections?: Resolver<ResolversTypes['getCollectionsOutput'], ParentType, ContextType, RequireFields<QueryGetCollectionsArgs, 'input'>>;
   getHistoryByNFT?: Resolver<Maybe<ResolversTypes['getHistoryByNFTOutput']>, ParentType, ContextType, Partial<QueryGetHistoryByNftArgs>>;
   getListedNfts?: Resolver<ResolversTypes['getListedNftsOutput'], ParentType, ContextType, RequireFields<QueryGetListedNftsArgs, 'input'>>;
-  getNftInfo?: Resolver<ResolversTypes['Nft'], ParentType, ContextType, RequireFields<QueryGetNftInfoArgs, 'input'>>;
+  getNftInfo?: Resolver<ResolversTypes['getNftInfoOutput'], ParentType, ContextType, RequireFields<QueryGetNftInfoArgs, 'input'>>;
+  getNftListingsOfSameToken?: Resolver<ResolversTypes['getNftListingsOfSameTokenOutput'], ParentType, ContextType, RequireFields<QueryGetNftListingsOfSameTokenArgs, 'input'>>;
   getNftOwners?: Resolver<ResolversTypes['getNftOwnersOutput'], ParentType, ContextType, RequireFields<QueryGetNftOwnersArgs, 'input'>>;
   getUserListedNfts?: Resolver<ResolversTypes['getUserListedNftsOutput'], ParentType, ContextType, RequireFields<QueryGetUserListedNftsArgs, 'input'>>;
   getUserProfile?: Resolver<ResolversTypes['userShow'], ParentType, ContextType, RequireFields<QueryGetUserProfileArgs, 'input'>>;
   getUsersNfts?: Resolver<ResolversTypes['getUsersNftsOutput'], ParentType, ContextType, RequireFields<QueryGetUsersNftsArgs, 'input'>>;
   indexNftAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<QueryIndexNftAddressArgs, 'input'>>;
+  refreshMetaData?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<QueryRefreshMetaDataArgs, 'input'>>;
   searchCollectionByName?: Resolver<Maybe<ResolversTypes['getCollectionsOutput']>, ParentType, ContextType, Partial<QuerySearchCollectionByNameArgs>>;
   usernameAvailable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<QueryUsernameAvailableArgs, 'username'>>;
 };
@@ -857,8 +934,23 @@ export type GetListedNftsOutputResolvers<ContextType = any, ParentType extends R
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GetNftInfoOutputResolvers<ContextType = any, ParentType extends ResolversParentTypes['getNftInfoOutput'] = ResolversParentTypes['getNftInfoOutput']> = {
+  collectionInfo?: Resolver<ResolversTypes['Collection'], ParentType, ContextType>;
+  listingInfo?: Resolver<Maybe<ResolversTypes['NftListingInfo']>, ParentType, ContextType>;
+  nftInfo?: Resolver<ResolversTypes['Nft'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GetNftListingsOfSameTokenOutputResolvers<ContextType = any, ParentType extends ResolversParentTypes['getNftListingsOfSameTokenOutput'] = ResolversParentTypes['getNftListingsOfSameTokenOutput']> = {
+  after?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  before?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  data?: Resolver<Array<Maybe<ResolversTypes['nftOwner']>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GetNftOwnersOutputResolvers<ContextType = any, ParentType extends ResolversParentTypes['getNftOwnersOutput'] = ResolversParentTypes['getNftOwnersOutput']> = {
   count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  cursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   data?: Resolver<Array<Maybe<ResolversTypes['nftOwner']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -878,8 +970,20 @@ export type GetUsersNftsOutputResolvers<ContextType = any, ParentType extends Re
 };
 
 export type NftOwnerResolvers<ContextType = any, ParentType extends ResolversParentTypes['nftOwner'] = ResolversParentTypes['nftOwner']> = {
-  amount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  user?: Resolver<ResolversTypes['user'], ParentType, ContextType>;
+  amount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  displayName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  listingInfo?: Resolver<Maybe<ResolversTypes['nftOwnerListingInfo']>, ParentType, ContextType>;
+  profileImage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  refId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  userPublicAddress?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  username?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type NftOwnerListingInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['nftOwnerListingInfo'] = ResolversParentTypes['nftOwnerListingInfo']> = {
+  amount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  listingId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  price?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -931,6 +1035,7 @@ export type Resolvers<ContextType = any> = {
   Mutation?: MutationResolvers<ContextType>;
   Nft?: NftResolvers<ContextType>;
   NftListing?: NftListingResolvers<ContextType>;
+  NftListingInfo?: NftListingInfoResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   RoyaltyInfo?: RoyaltyInfoResolvers<ContextType>;
   authUserOutput?: AuthUserOutputResolvers<ContextType>;
@@ -939,10 +1044,13 @@ export type Resolvers<ContextType = any> = {
   getCollectionsOutput?: GetCollectionsOutputResolvers<ContextType>;
   getHistoryByNFTOutput?: GetHistoryByNftOutputResolvers<ContextType>;
   getListedNftsOutput?: GetListedNftsOutputResolvers<ContextType>;
+  getNftInfoOutput?: GetNftInfoOutputResolvers<ContextType>;
+  getNftListingsOfSameTokenOutput?: GetNftListingsOfSameTokenOutputResolvers<ContextType>;
   getNftOwnersOutput?: GetNftOwnersOutputResolvers<ContextType>;
   getUserListedNftsOutput?: GetUserListedNftsOutputResolvers<ContextType>;
   getUsersNftsOutput?: GetUsersNftsOutputResolvers<ContextType>;
   nftOwner?: NftOwnerResolvers<ContextType>;
+  nftOwnerListingInfo?: NftOwnerListingInfoResolvers<ContextType>;
   user?: UserResolvers<ContextType>;
   userAuthData?: UserAuthDataResolvers<ContextType>;
   userShow?: UserShowResolvers<ContextType>;

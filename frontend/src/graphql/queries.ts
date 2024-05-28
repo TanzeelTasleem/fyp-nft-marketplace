@@ -147,13 +147,42 @@ export const getCollections = /* GraphQL */ `
 export const getNftInfo = /* GraphQL */ `
   query MyQuery($input: getNftInfoInput!) {
     getNftInfo(input: $input) {
-      blockChainStatus
-      collectionRef
-      imageUrl
-      refId
-      tokenId
-      totalSupply
-      tokenUri
+      listingInfo {
+        isListed
+        listingId
+        listingType
+        price
+      }
+      nftInfo {
+        tokenId
+        name
+        tokenUri
+        totalSupply
+        syncedAt
+        refId
+        metadata
+        ipfsImageHash
+        imageUrl
+        transactionHash
+        description
+        contractType
+        collectionRef
+        blockNumberMinted
+        blockNumber
+        blockChainStatus
+        amount
+      }
+      collectionInfo {
+        blockChainStatus
+        category
+        coverImage
+        creatorRef
+        description
+        id
+        name
+        profileImage
+        ref
+      }
     }
   }
 `
@@ -248,6 +277,45 @@ query getUserListedNfts($input:getUserListedNftsInput!){
       tokenId
       tokenUri
       transactionHash
+    }
+  }
+}
+`
+
+export const getNftOwners = /* GraphQL */ `
+query MyQuery($input: getNftOwnersInput!) {
+  getNftOwners(input: $input) {
+    data {
+      amount
+      profileImage
+      refId
+      userPublicAddress
+      username
+      displayName
+    }
+    count
+    cursor
+  }
+}
+`
+
+export const getNftListingsOfSameToken = /* GraphQL */ `
+query MyQuery($input: getNftListingsOfSameTokenInput!) {
+  getNftListingsOfSameToken(input: $input) {
+    after
+    before
+    data {
+      amount
+      displayName
+      listingInfo {
+        amount
+        listingId
+        price
+      }
+      profileImage
+      refId
+      userPublicAddress
+      username
     }
   }
 }

@@ -206,7 +206,7 @@ export const NavBarItem: FC<NavBarItemProps> = ({ title, link, listItems }) => {
     <div className="navbar-item group flex flex-col" >
       <span onClick={e => { link && navigate(link) }} >{title}</span>
       <span className='lines'></span>
-      <div className={` item-dropdown group-hover:flex hover:flex hidden`}>
+      <div className={`item-dropdown group-hover:flex hover:flex hidden`}>
         <div className="dropdown">
           {listItems?.map(({ title, link }, idx) => {
             return <Link className="block" to={link} key={idx} >{title}</Link>
