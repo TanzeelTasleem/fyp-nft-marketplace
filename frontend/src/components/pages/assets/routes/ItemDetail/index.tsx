@@ -131,10 +131,11 @@ const ItemDetail: FC<RouteComponentProps> = ({ location }) => {
                             <Button onClick={() => navigate("./list", { state: { nftInfo: { ...nftInfo, amount: userNonListedTokenBalnace?.toString() } as typeof nftInfo, nftMeta } })}>List NFT</Button>}
 
                         <span>
-                            {nftInfo && listingInfo && listingInfo.listingType === Listing_Type.SELL && sellingDetails &&
+                            {nftInfo && listingInfo && listingInfo.listingType === Listing_Type.SELL && sellingDetails && userData?.publicAddress &&
                                 <BuyNft
                                     sellingSupply={sellingDetails.amount} assetId={nftInfo.tokenId!} assetName={nftInfo.name!}
                                     collectionName={collectionInfo?.name || ""} imgUrl={nftInfo.imageUrl} price={listingInfo.price!} listingId={listingInfo.listingId!}
+                                    sellingDetails={sellingDetails}
                                 />}
 
                             {nftInfo && listingInfo && listingInfo.listingType === Listing_Type.AUCTION &&
@@ -218,6 +219,7 @@ const OwnersTab = React.memo<{ listingType: Listing_Type }>(({ listingType }) =>
     const listedTokensOwners = useAppSelector(s => s.nftDetail.listedTokensOwners);
     const nonListedTokensOwners = useAppSelector(s => s.nftDetail.nonListedTokensOwners);
     const { assetId } = useAssetsParams();
+    const {userData} = useAppSelector(s => s.userAuth);
 
     // useEffect(() => {
     //     dispatch(getNftListingsOfSameToken({ tokenId: assetId }))
@@ -236,12 +238,13 @@ const OwnersTab = React.memo<{ listingType: Listing_Type }>(({ listingType }) =>
                         </div>
 
                     </div>
-                    {nftInfo && listingInfo && listingType === Listing_Type.SELL && sellingDetails &&
+                    {nftInfo && listingInfo && listingType === Listing_Type.SELL && sellingDetails && userData?.publicAddress &&
                         <div className="flex justify-evenly" >
                             <div>X {sellingDetails.amount}</div>
                             <BuyNft
                                 sellingSupply={sellingDetails.amount} assetId={nftInfo.tokenId!} assetName={nftInfo.name!}
                                 collectionName={collectionInfo?.name || ""} imgUrl={nftInfo.imageUrl} price={listingInfo.price!} listingId={`${listingInfo.listingId}`}
+                                sellingDetails={sellingDetails}
                             />
                         </div>}
                 </div>

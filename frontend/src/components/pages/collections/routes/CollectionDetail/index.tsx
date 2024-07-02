@@ -146,6 +146,8 @@ const CollectionDetail: FC<RouteComponentProps> = ({ }) => {
                           className="object-cover w-32 h-32 rounded-full top-5 relative bg-gray-100 border-4 border-white"
                           alt="logo Image"
                           loading="lazy"
+                          style={{    maxHeight: "150px",
+                            "maxWidth": "150px"}}
                         />
                         <i className="fa fa-check"></i>
                       </div>

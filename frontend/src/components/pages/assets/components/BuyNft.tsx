@@ -5,6 +5,7 @@ import { XIcon } from '@heroicons/react/outline';
 import { S3_BUCKET } from '../../../../app-config';
 import { uuid } from '../../../../utils/helper';
 import { ethers } from 'ethers';
+import { SellingDetailsResponse } from '../../../../block-chain/contract/Market';
 
 interface Props {
    assetId: string;
@@ -14,9 +15,10 @@ interface Props {
    listingId: string;
    sellingSupply: number;
    imgUrl?: string;
+   sellingDetails: SellingDetailsResponse | null
 }
 
-const BuyNft: FC<Props> = ({ price, assetId, assetName, collectionName, listingId, imgUrl, sellingSupply }) => {
+const BuyNft: FC<Props> = ({ price, assetId, assetName, collectionName, listingId, imgUrl, sellingSupply , sellingDetails }) => {
    const [open, setOpen] = useState(false);
    const handleOpen = () => { setOpen(true) }
    const handleClose = () => { setOpen(false) }
@@ -24,6 +26,7 @@ const BuyNft: FC<Props> = ({ price, assetId, assetName, collectionName, listingI
    const { marketContract } = useAppSelector(s => s.contract);
    const showDialog = useAppSelector(s => s.alerts.showDialog);
    const [amount, setAmount] = useState(1);
+   const userData = useAppSelector(s => s.userAuth.userData);
 
    // {ethers.utils.formatEther((price?.toString() || ""))}
    const handleBuyNow = async () => {
@@ -54,7 +57,7 @@ const BuyNft: FC<Props> = ({ price, assetId, assetName, collectionName, listingI
 
    return (
       <>
-         <Button className='text-sm' onClick={handleOpen} >Buy for {ethers.utils.formatEther((`${price}`))} Matic</Button>
+         <Button disabled={sellingDetails?.seller ? sellingDetails?.seller.toLocaleLowerCase() == userData?.publicAddress?.toLowerCase() ? true : false : false} className='text-sm' onClick={handleOpen} >Buy for {ethers.utils.formatEther((`${price}`))} Matic</Button>
          {open &&
             <Backdrop open onClick={e => { e.target === e.currentTarget && handleClose() }} >
                <div className='bg-slate-100 w-[450px] rounded-lg p-2 px-4 m-2' >

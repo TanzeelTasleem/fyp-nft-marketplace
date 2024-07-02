@@ -17,23 +17,23 @@ const UserOwnedNfts : FC<{refId:string}> = ({refId}) => {
   const [hasMore, setHasMore] = useState(false);
 
   
-  const lastPostElementRef = useCallback(
-    node => {
-      if (loading) return
-      if (observer.current) observer.current.disconnect()
-      observer.current = new IntersectionObserver(entries => {
-        if (entries[0].isIntersecting && hasMore) {
-          // console.log("pagination condition true", hasMore, nftInfo.after)
-          //  setAfter(nftInfo.after)
-          if (userNfts.getUsersNfts.cursor) {
-            fetchUserNfts()
-          }
-        }
-      })
-      if (node) observer.current.observe(node)
-    },
-    [loading, hasMore]
-  )
+  // const lastPostElementRef = useCallback(
+  //   node => {
+  //     if (loading) return
+  //     if (observer.current) observer.current.disconnect()
+  //     observer.current = new IntersectionObserver(entries => {
+  //       if (entries[0].isIntersecting && hasMore) {
+  //         // console.log("pagination condition true", hasMore, nftInfo.after)
+  //         //  setAfter(nftInfo.after)
+  //         if (userNfts.getUsersNfts.cursor) {
+  //           fetchUserNfts()
+  //         }
+  //       }
+  //     })
+  //     if (node) observer.current.observe(node)
+  //   },
+  //   [loading, hasMore]
+  // )
 
 
   const [userNfts, setUserNfts] = useState<{getUsersNfts:{count:number, cursor?: string , data:Nft[]}}>({getUsersNfts:{count:0 , data:[]}});
@@ -44,7 +44,7 @@ const UserOwnedNfts : FC<{refId:string}> = ({refId}) => {
           query:getUsersNfts,
           variables : {
             input:{
-                pageSize:2,
+                pageSize:10,
                 // ...( userData?.publicAddress && {userPublicAddress:userData?.publicAddress} ),
                 ...( refId && {refId:refId}),
                 ...( hasMore && {cursor:userNfts.getUsersNfts.cursor}),
@@ -54,13 +54,13 @@ const UserOwnedNfts : FC<{refId:string}> = ({refId}) => {
         { "x-api-key": APPSYNC_GRAPHQL.API_KEY! }
         ) as GraphQLResult<{getUsersNfts:{count:number , cursor?:string , data:Nft[]}}>
         setLoading(false)
+        console.log("getUserNfts ::::", data?.getUsersNfts ,data?.getUsersNfts.data[0].metadata);
         if(data?.getUsersNfts.count && data.getUsersNfts.data.length){
           setUserNfts({getUsersNfts:{count:data.getUsersNfts.count , data:[...userNfts.getUsersNfts.data, ...data.getUsersNfts.data ] , cursor:data.getUsersNfts.cursor}});
           if(data?.getUsersNfts.cursor) { setHasMore(true) }
           else{setHasMore(false)}
         }else{setHasMore(false)}
 
-        console.log("getUserNfts ::::",data)
       } catch (error) {
         setIsError(error as any);
         setLoading(false);
@@ -79,7 +79,7 @@ const UserOwnedNfts : FC<{refId:string}> = ({refId}) => {
         <div className="row mx-auto max-w-7xl ">
           {
             [...userNfts.getUsersNfts.data].map((nft , index)=>(
-              <div className='d-item col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-4 ' key={index} ref={lastPostElementRef} >
+              <div className='d-item col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-4 ' key={index}  >
                 <NFTCard data={{...nft , ...(nft.metadata  && {name: JSON.parse(nft?.metadata).name} )}} />
               </div>
             ))

@@ -74,7 +74,7 @@ const ListNftForm: FC<{ assetId: number, nftInfo: Nft, nftMeta?: NFTmeta }> = ({
 
       let transaction: ContractTransaction | null = null;
       if (listingType === "FIXED_PRICED") {
-         console.log("calling marketContract.sellNft")
+         console.log("calling marketContract.sellNft" , Number(price), Number(numberOfTokens), assetId);
          transaction = await marketContract.sellNft(Number(price), Number(numberOfTokens), assetId);
       } else if (listingType === "TIMED_AUCTION") {
          console.log("calling marketContract.createAuction")
