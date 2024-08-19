@@ -1,0 +1,9 @@
+{
+    "moralisServerUrl": "https://mshom0d5ih3f.usemoralis.com:2053/server",
+    "moralisAppId" :"Susc0M8VmhbKQoCRYVRX0ATeP1nhXMW5gNlzwt1P",
+    "moralisApiKey": "wMYJMBsTsgfvyQjvWugJZzmive32oNvFSSScgrUIRdmDTuQ4M6jkRTfDEHpU8PhV",
+    "alchemyAPIKEY": "F8OcbsSaq9eXumFZZHDcifoxnyXURoNg",
+    "chain": "mumbai",
+    "faunaSecret": "fnAFiCoiCqAAQKlNbmUUAgFOo0mxNmyEHkNeFbcv",
+    "faunaServer": "db.us.fauna.com"
+}
