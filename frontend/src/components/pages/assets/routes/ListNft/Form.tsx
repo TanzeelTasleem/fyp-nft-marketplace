@@ -160,6 +160,7 @@ const ListNftForm: FC<{ assetId: number, nftInfo: Nft, nftMeta?: NFTmeta }> = ({
                         title={isAuctionAllowed ? undefined : `Auction is only allowed on single token supply`}
                         onClick={() => { isAuctionAllowed && setFieldValue("listingType", "TIMED_AUCTION") }}
                         className={`${values.listingType === "TIMED_AUCTION" ? "active" : ""}`}
+                        style={{display:"none"}}
                      >
                         <span style={{ cursor: isAuctionAllowed ? undefined : "not-allowed", color: isAuctionAllowed ? undefined : "#ddd" }} >
                            <i className="fa fa-hourglass-1"></i>Timed auction

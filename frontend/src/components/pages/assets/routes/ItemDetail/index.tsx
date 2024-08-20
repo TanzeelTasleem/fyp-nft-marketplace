@@ -20,8 +20,8 @@ import CountDown from '../../components/CountDown';
 
 enum TabsEnum {
     Owners = "Owners",
-    Details = "Details",
-    History = "History",
+    // Details = "Details",
+    // History = "History",
 }
 
 const ItemDetail: FC<RouteComponentProps> = ({ location }) => {
@@ -46,14 +46,12 @@ const ItemDetail: FC<RouteComponentProps> = ({ location }) => {
     }, [assetId])
 
     useEffect(() => {
-
         return () => { dispatch(clearAllState()) }
     }, [])
 
     useEffect(() => {
         nftContract && userData?.publicAddress &&
-            nftContract.balanceOf(userData.publicAddress, assetId).then(v => { setUserNonListedTokenBalance(v) });
-
+            nftContract.balanceOf(userData.publicAddress, assetId).then(v => { setUserNonListedTokenBalance(v);console.log("setUserNonListedTokenBalance :::" , v) });
         // marketContract?.getBidslist(listingInfo?.listingId)
     }, [userData?.publicAddress, nftContract])
 
@@ -196,8 +194,8 @@ const ItemDetail: FC<RouteComponentProps> = ({ location }) => {
                                 })}
                             </div>
                             {selectedTab === TabsEnum.Owners && <OwnersTab listingType={listingInfo?.listingType!} />}
-                            {selectedTab === TabsEnum.Details && <DetailsTab />}
-                            {selectedTab === TabsEnum.History && <HistoryTab />}
+                            {/* {selectedTab === TabsEnum.Details && <DetailsTab />}
+                            {selectedTab === TabsEnum.History && <HistoryTab />} */}
 
                         </div>
                     </div>
@@ -238,7 +236,7 @@ const OwnersTab = React.memo<{ listingType: Listing_Type }>(({ listingType }) =>
                         </div>
 
                     </div>
-                    {nftInfo && listingInfo && listingType === Listing_Type.SELL && sellingDetails && userData?.publicAddress &&
+                    {/* {nftInfo && listingInfo && listingType === Listing_Type.SELL && sellingDetails && userData?.publicAddress &&
                         <div className="flex justify-evenly" >
                             <div>X {sellingDetails.amount}</div>
                             <BuyNft
@@ -246,7 +244,7 @@ const OwnersTab = React.memo<{ listingType: Listing_Type }>(({ listingType }) =>
                                 collectionName={collectionInfo?.name || ""} imgUrl={nftInfo.imageUrl} price={listingInfo.price!} listingId={`${listingInfo.listingId}`}
                                 sellingDetails={sellingDetails}
                             />
-                        </div>}
+                        </div>} */}
                 </div>
             })}
             {nonListedTokensOwners.data.map(({ amount, displayName, listingInfo, profileImage, refId, userPublicAddress, username }, key) => {
