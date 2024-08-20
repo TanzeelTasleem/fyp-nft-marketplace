@@ -1,0 +1,29 @@
+schema: ./schema/schema.graphql
+generates:
+  ./lambda/Auth/codegenTypes.ts:
+    plugins:
+      - typescript
+  ./lambda/User/codegenTypes.ts:
+    plugins:
+      - typescript
+  ./lambda/blockChainListener/codegenTypes.ts:
+   plugins:
+      - typescript
+  ./lambda/Collection/codegenTypes.ts:
+    plugins:
+      - typescript
+  ./lambda/getBlockChainStatus/codegenTypes.ts:
+    plugins:
+      - typescript
+  ./lambda/Nft/codegenTypes.ts:
+    plugins:
+      - typescript   
+  ./lambda/History/codegenTypes.ts:
+    plugins:
+      - typescript   
+  ./lambda/webhook/codegenTypes.ts:
+    plugins:
+      - typescript   
+config:
+  declarationKind: 'interface'
+  useImplementingTypes: true
